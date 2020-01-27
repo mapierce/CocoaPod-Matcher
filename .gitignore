@@ -1,2 +1,3 @@
 Podfile
 Podfile.lock
+*.pyc
