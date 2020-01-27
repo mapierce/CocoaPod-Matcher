@@ -9,11 +9,26 @@ def check_directory_is_valid():
 	return os.path.isfile(script_path+constants.PODFILE) and os.path.isfile(script_path+constants.PODFILE_LOCK)
 
 def read_podfile_lock():
-	podfile_lock = open(os.path.dirname(os.path.abspath( __file__ ))+constants.PODFILE_LOCK, "r").readlines()
-	dependencies_index = podfile_lock.index(constants.DEPENDENCIES_STRING)
-	valid_pods = list(filter(lambda x: x.startswith(constants.INSTALLED_POD_PREFIX), podfile_lock[0:dependencies_index])) 
+	podfile_lock = open(os.path.dirname(os.path.abspath( __file__ ))+constants.PODFILE_LOCK, "r")
+	lines = podfile_lock.readlines()
+	dependencies_index = lines.index(constants.DEPENDENCIES_STRING)
+	valid_pods = list(filter(lambda x: x.startswith(constants.INSTALLED_POD_PREFIX), lines[0:dependencies_index])) 
 	pods = dict(map(lambda x: split_text_to_pod_and_version(x), valid_pods))
-	for key, val in pods.items():
+	podfile_lock.close()
+	return pods
+
+def read_podfile():
+	podfile = open(os.path.dirname(os.path.abspath(__file__))+constants.PODFILE, "r")
+	podfile_stripped = list(map(lambda x: x.strip(), podfile.readlines()))
+	valid_pods = list(filter(lambda x: x.startswith("pod "), podfile_stripped))
+	unversioned_pod_text = list(filter(lambda x: "," not in x, valid_pods))
+	unversioned_pods = list(map(lambda x: x[x.index("'")+1:-1], unversioned_pod_text))
+	podfile.close()
+	return unversioned_pods
+
+def update_podfile(versioned_pods, unversioned_pods):
+	podfile = open(os.path.dirname(os.path.abspath(__file__))+constants.PODFILE, "r")
+	for key, val in versioned_pods.items():
 		print(key, val)
 
 def split_text_to_pod_and_version(text):
@@ -34,5 +49,7 @@ if __name__ == "__main__":
 		print("A Podfile and a Podfile.lock were not found in the current directory")
 	else:
 		print("Valid files found")
-		read_podfile_lock()
+		versioned_pods = read_podfile_lock()
+		unversioned_pods = read_podfile()
+		update_podfile(versioned_pods, unversioned_pods)
 	# read_arguments(argv)
