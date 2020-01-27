@@ -17,11 +17,10 @@ def read_podfile_lock():
 		print(key, val)
 
 def split_text_to_pod_and_version(text):
-	items = text.split("(")
+	items = text.split(constants.OPEN_BRACKET)
 	pod_name = items[0].strip()[2:]
-	pod_version = items[1].strip().split(")")[0]
+	pod_version = items[1].strip().split(constants.CLOSE_BRACKET)[0]
 	return pod_name, pod_version
-	# print(pod_name + ": " + pod_version)
 
 def read_arguments(args):
 	if len(args) == 2:
