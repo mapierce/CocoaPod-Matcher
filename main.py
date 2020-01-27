@@ -9,6 +9,7 @@ def check_directory_is_valid():
 	return os.path.isfile(script_path+constants.PODFILE) and os.path.isfile(script_path+constants.PODFILE_LOCK)
 
 def read_podfile_lock():
+	print("Reading Pod versions from lock file...")
 	podfile_lock = open(os.path.dirname(os.path.abspath( __file__ ))+constants.PODFILE_LOCK, "r")
 	lines = podfile_lock.readlines()
 	dependencies_index = lines.index(constants.DEPENDENCIES_STRING)
@@ -17,19 +18,22 @@ def read_podfile_lock():
 	podfile_lock.close()
 	return pods
 
-def read_podfile():
+def update_podfile(versioned_pods):
+	print("Updating Pod versions...")
 	podfile = open(os.path.dirname(os.path.abspath(__file__))+constants.PODFILE, "r")
-	podfile_stripped = list(map(lambda x: x.strip(), podfile.readlines()))
-	valid_pods = list(filter(lambda x: x.startswith("pod "), podfile_stripped))
-	unversioned_pod_text = list(filter(lambda x: "," not in x, valid_pods))
-	unversioned_pods = list(map(lambda x: x[x.index("'")+1:-1], unversioned_pod_text))
-	podfile.close()
-	return unversioned_pods
+	updated_podfile = open(os.path.dirname(os.path.abspath(__file__))+constants.PODFILE_TMP, "w")
+	for line in podfile.readlines():
+		stripped_line = line.strip()
+		if stripped_line.startswith(constants.POD_PREFIX) and ", " not in stripped_line:
+			unversioned_pod = stripped_line[stripped_line.index("'")+1:-1]
+			updated_line = line.rstrip(constants.NEW_LINE) + ", '" + versioned_pods[unversioned_pod] + "'" + constants.NEW_LINE
+			updated_podfile.write(updated_line)
+		else :
+			updated_podfile.write(line)
 
-def update_podfile(versioned_pods, unversioned_pods):
-	podfile = open(os.path.dirname(os.path.abspath(__file__))+constants.PODFILE, "r")
-	for key, val in versioned_pods.items():
-		print(key, val)
+def overwrite_podfile():
+	print("Writing to Podfile...")
+	os.rename(os.path.dirname(os.path.abspath(__file__))+constants.PODFILE_TMP, os.path.dirname(os.path.abspath(__file__))+constants.PODFILE)
 
 def split_text_to_pod_and_version(text):
 	items = text.split(constants.OPEN_BRACKET)
@@ -37,19 +41,19 @@ def split_text_to_pod_and_version(text):
 	pod_version = items[1].strip().split(constants.CLOSE_BRACKET)[0]
 	return pod_name, pod_version
 
-def read_arguments(args):
-	if len(args) == 2:
-		print "The parameter is " + argv[1]
-	else:
-		print "Please enter exactly one parameter"		
-
-	
 if __name__ == "__main__":
 	if check_directory_is_valid() is False:
-		print("A Podfile and a Podfile.lock were not found in the current directory")
+		print("A Podfile and/or a Podfile.lock were not found in the current directory")
 	else:
 		print("Valid files found")
-		versioned_pods = read_podfile_lock()
-		unversioned_pods = read_podfile()
-		update_podfile(versioned_pods, unversioned_pods)
-	# read_arguments(argv)
+		update_podfile(read_podfile_lock())
+		overwrite_podfile()
+		print("Done")
+
+
+
+
+
+
+
+
