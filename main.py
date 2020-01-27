@@ -2,7 +2,6 @@
 
 import os
 import constants
-from sys import argv
 
 def check_directory_is_valid():
 	script_path = os.path.dirname(os.path.abspath( __file__ ))
