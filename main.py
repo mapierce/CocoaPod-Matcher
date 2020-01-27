@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 
 import os
+import constants
 from sys import argv
 
 def check_directory_is_valid():
 	script_path = os.path.dirname(os.path.abspath( __file__ ))
-	return os.path.isfile(script_path+"/Podfile") and os.path.isfile(script_path+"/Podfile.lock")
+	return os.path.isfile(script_path+constants.PODFILE) and os.path.isfile(script_path+constants.PODFILE_LOCK)
+
+def read_podfile_lock():
+	podfile_lock = open(os.path.dirname(os.path.abspath( __file__ ))+constants.PODFILE_LOCK, "r").readlines()
+	dependencies_index = podfile_lock.index(constants.DEPENDENCIES_STRING)
+	valid_pods = list(filter(lambda x: x.startswith(constants.INSTALLED_POD_PREFIX), podfile_lock[0:dependencies_index])) 
+	for line in valid_pods:	
+		print(line)
 
 def read_arguments(args):
 	if len(args) == 2:
@@ -13,10 +21,11 @@ def read_arguments(args):
 	else:
 		print "Please enter exactly one parameter"		
 
-def main():
-	# read_arguments(argv)
-	print(check_directory_is_valid())
-
 	
 if __name__ == "__main__":
-	main()
+	if check_directory_is_valid() is False:
+		print("A Podfile and a Podfile.lock were not found in the current directory")
+	else:
+		print("Valid files found")
+		read_podfile_lock()
+	# read_arguments(argv)
