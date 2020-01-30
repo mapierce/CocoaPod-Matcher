@@ -14,7 +14,7 @@ class CONSTANTS:
 	POD_PREFIX="pod "
 
 def check_directory_is_valid():
-	script_path = os.path.dirname(os.path.abspath( __file__ ))
+	script_path = os.getcwd()
 	print(script_path)
 	return os.path.isfile(script_path+CONSTANTS.PODFILE) and os.path.isfile(script_path+CONSTANTS.PODFILE_LOCK)
 
