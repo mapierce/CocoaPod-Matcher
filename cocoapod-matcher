@@ -15,12 +15,11 @@ class CONSTANTS:
 
 def check_directory_is_valid():
 	script_path = os.getcwd()
-	print(script_path)
 	return os.path.isfile(script_path+CONSTANTS.PODFILE) and os.path.isfile(script_path+CONSTANTS.PODFILE_LOCK)
 
 def read_podfile_lock():
 	print("Reading Pod versions from lock file...")
-	podfile_lock = open(os.path.dirname(os.path.abspath( __file__ ))+CONSTANTS.PODFILE_LOCK, "r")
+	podfile_lock = open(os.getcwd()+CONSTANTS.PODFILE_LOCK, "r")
 	lines = podfile_lock.readlines()
 	dependencies_index = lines.index(CONSTANTS.DEPENDENCIES_STRING)
 	valid_pods = list(filter(lambda x: x.startswith(CONSTANTS.INSTALLED_POD_PREFIX), lines[0:dependencies_index])) 
@@ -30,8 +29,8 @@ def read_podfile_lock():
 
 def update_podfile(versioned_pods):
 	print("Updating Pod versions...")
-	podfile = open(os.path.dirname(os.path.abspath(__file__))+CONSTANTS.PODFILE, "r")
-	updated_podfile = open(os.path.dirname(os.path.abspath(__file__))+CONSTANTS.PODFILE_TMP, "w")
+	podfile = open(os.getcwd()+CONSTANTS.PODFILE, "r")
+	updated_podfile = open(os.getcwd()+CONSTANTS.PODFILE_TMP, "w")
 	for line in podfile.readlines():
 		stripped_line = line.strip()
 		if stripped_line.startswith(CONSTANTS.POD_PREFIX) and ", " not in stripped_line:
@@ -43,7 +42,7 @@ def update_podfile(versioned_pods):
 
 def overwrite_podfile():
 	print("Writing to Podfile...")
-	os.rename(os.path.dirname(os.path.abspath(__file__))+CONSTANTS.PODFILE_TMP, os.path.dirname(os.path.abspath(__file__))+CONSTANTS.PODFILE)
+	os.rename(os.getcwd()+CONSTANTS.PODFILE_TMP, os.getcwd()+CONSTANTS.PODFILE)
 
 def split_text_to_pod_and_version(text):
 	items = text.split(CONSTANTS.OPEN_BRACKET)
