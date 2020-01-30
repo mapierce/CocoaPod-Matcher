@@ -35,7 +35,10 @@ def update_podfile(versioned_pods):
 		stripped_line = line.strip()
 		if stripped_line.startswith(CONSTANTS.POD_PREFIX) and ", " not in stripped_line:
 			unversioned_pod = stripped_line[stripped_line.index("'")+1:-1]
-			updated_line = line.rstrip(CONSTANTS.NEW_LINE) + ", '" + versioned_pods[unversioned_pod] + "'" + CONSTANTS.NEW_LINE
+			if unversioned_pod in versioned_pods.keys():
+				updated_line = line.rstrip(CONSTANTS.NEW_LINE) + ", '" + versioned_pods[unversioned_pod] + "'" + CONSTANTS.NEW_LINE
+			else:
+				updated_line = line
 			updated_podfile.write(updated_line)
 		else :
 			updated_podfile.write(line)
@@ -46,7 +49,7 @@ def overwrite_podfile():
 
 def split_text_to_pod_and_version(text):
 	items = text.split(CONSTANTS.OPEN_BRACKET)
-	pod_name = items[0].strip()[2:]
+	pod_name = items[0].strip(" -\"")
 	pod_version = items[1].strip().split(CONSTANTS.CLOSE_BRACKET)[0]
 	return pod_name, pod_version
 
